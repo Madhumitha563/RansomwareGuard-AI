@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="space-y-6">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center">
+
+<div>
+
+<h1 class="text-3xl font-bold">
+Backup & Recovery
+</h1>
+
+<p class="text-gray-400">
+Manage system backups and restore operations
+</p>
+
+</div>
+
+<div class="flex gap-3">
+
+<button
+onclick="startBackup()"
+class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
+
+Start Backup
+
+</button>
+
+<button
+onclick="restoreSystem()"
+class="bg-yellow-600 px-4 py-2 rounded-lg hover:bg-yellow-700">
+
+Restore System
+
+</button>
+
+</div>
+
+</div>
+
+<!-- STATUS CARDS -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<!-- Backup Status -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Backup Status
+</p>
+
+<h2
+id="backupStatus"
+class="text-xl text-green-400 mt-2">
+
+Idle
+
+</h2>
+
+</div>
+
+<!-- Last Backup -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Last Backup Time
+</p>
+
+<h2
+id="lastBackup"
+class="text-lg text-white mt-2">
+
+None
+
+</h2>
+
+</div>
+
+<!-- Total Backups -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Total Backups
+</p>
+
+<h2
+id="backupCount"
+class="text-4xl text-cyan-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+</div>
+
+<!-- PROGRESS BAR -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+
+Backup Progress
+
+</h3>
+
+<div class="w-full bg-gray-800 rounded-lg">
+
+<div
+id="progressBar"
+class="bg-green-500 h-4 rounded-lg"
+style="width: 0%;">
+
+</div>
+
+</div>
+
+<p
+id="progressText"
+class="mt-2 text-gray-400">
+
+0%
+
+</p>
+
+</div>
+
+<!-- BACKUP HISTORY -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+
+Backup History
+
+</h3>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left">
+
+<thead>
+
+<tr class="border-b border-gray-700">
+
+<th class="p-3">
+Backup ID
+</th>
+
+<th class="p-3">
+Date
+</th>
+
+<th class="p-3">
+Status
+</th>
+
+<th class="p-3">
+Action
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="backupTable">
+
+<tr>
+
+<td class="p-3">
+No backups yet
+</td>
+
+<td class="p-3">
+-
+</td>
+
+<td class="p-3">
+Idle
+</td>
+
+<td class="p-3">
+-
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let backupCounter = 0
+
+/* START BACKUP */
+
+function startBackup() {
+
+document.getElementById(
+"backupStatus"
+).innerText =
+"Running..."
+
+document.getElementById(
+"backupStatus"
+).style.color =
+"yellow"
+
+let progress = 0
+
+const interval =
+setInterval(() => {
+
+progress += 10
+
+document.getElementById(
+"progressBar"
+).style.width =
+progress + "%"
+
+document.getElementById(
+"progressText"
+).innerText =
+progress + "%"
+
+if (progress >= 100) {
+
+clearInterval(interval)
+
+finishBackup()
+
+}
+
+}, 500)
+
+}
+
+/* FINISH BACKUP */
+
+function finishBackup() {
+
+backupCounter++
+
+const now =
+new Date().toLocaleString()
+
+document.getElementById(
+"backupStatus"
+).innerText =
+"Completed"
+
+document.getElementById(
+"backupStatus"
+).style.color =
+"green"
+
+document.getElementById(
+"lastBackup"
+).innerText =
+now
+
+document.getElementById(
+"backupCount"
+).innerText =
+backupCounter
+
+addBackupRow(now)
+
+}
+
+/* ADD TABLE ROW */
+
+function addBackupRow(date) {
+
+const table =
+document.getElementById(
+"backupTable"
+)
+
+const row =
+document.createElement(
+"tr"
+)
+
+row.classList.add(
+"border-b",
+"border-gray-700"
+)
+
+row.innerHTML = `
+
+<td class="p-3">
+
+BK-${backupCounter}
+
+</td>
+
+<td class="p-3">
+
+${date}
+
+</td>
+
+<td class="p-3 text-green-400">
+
+Success
+
+</td>
+
+<td class="p-3">
+
+<button
+onclick="restoreSystem()"
+class="bg-blue-600 px-3 py-1 rounded">
+
+Restore
+
+</button>
+
+</td>
+
+`
+
+table.prepend(row)
+
+}
+
+/* RESTORE SYSTEM */
+
+function restoreSystem() {
+
+alert(
+"System restore initiated"
+)
+
+}
+
+</script>
+
+{% endblock %}

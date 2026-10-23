@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="flex-1 flex items-center justify-center px-6 py-12">
+
+  <div class="w-full max-w-md">
+
+    <!-- Header -->
+
+    <div class="text-center mb-10">
+
+      <h2 class="text-3xl font-semibold text-white">
+        OTP Verification
+      </h2>
+
+      <p class="text-zinc-400 mt-2">
+        Enter the 6-digit code sent to your email
+      </p>
+
+    </div>
+
+    <!-- OTP Card -->
+
+    <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-10">
+
+      <!-- Flash Messages -->
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+
+            <div class="mb-6 p-4 bg-red-900/30 border border-red-500 text-red-300 rounded-2xl text-sm">
+
+              {{ message }}
+
+            </div>
+
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- OTP Form -->
+
+      <form method="POST" class="space-y-6">
+
+        <div>
+
+          <label class="block text-sm text-zinc-400 mb-2">
+            Enter OTP Code
+          </label>
+
+          <input
+            type="text"
+            name="otp"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            required
+            placeholder="Enter 6-digit OTP"
+            class="w-full text-center tracking-widest text-xl bg-zinc-800 border border-zinc-700 focus:border-blue-500 rounded-2xl px-5 py-4 outline-none text-white"
+          >
+
+        </div>
+
+        <!-- Submit -->
+
+        <button
+          type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-semibold text-lg transition"
+        >
+          Verify OTP
+        </button>
+
+      </form>
+
+      <!-- Resend -->
+
+      <div class="text-center mt-6">
+
+        <p class="text-sm text-zinc-400">
+          Didn't receive the code?
+        </p>
+
+        <a
+          href="/login"
+          class="text-blue-400 hover:text-blue-300 text-sm"
+        >
+          Try login again
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

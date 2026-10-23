@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="space-y-6">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center">
+
+<div>
+<h1 class="text-3xl font-bold">
+Security Logs
+</h1>
+
+<p class="text-gray-400">
+Real-time system and security event logs
+</p>
+</div>
+
+<div class="flex gap-3">
+
+<input
+id="searchInput"
+type="text"
+placeholder="Search logs..."
+class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-700">
+
+<button
+onclick="exportLogs()"
+class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700">
+
+Export Logs
+
+</button>
+
+<button
+onclick="clearLogs()"
+class="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
+
+Clear Logs
+
+</button>
+
+</div>
+
+</div>
+
+<!-- LOG COUNTERS -->
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Total Logs
+</p>
+
+<h2
+id="totalLogs"
+class="text-4xl text-white mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Warnings
+</p>
+
+<h2
+id="warningLogs"
+class="text-4xl text-yellow-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Errors
+</p>
+
+<h2
+id="errorLogs"
+class="text-4xl text-red-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Critical Events
+</p>
+
+<h2
+id="criticalLogs"
+class="text-4xl text-red-600 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+</div>
+
+<!-- LOG TABLE -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+System Logs
+</h3>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left">
+
+<thead>
+
+<tr class="border-b border-gray-700">
+
+<th class="p-3">
+Time
+</th>
+
+<th class="p-3">
+Event
+</th>
+
+<th class="p-3">
+Level
+</th>
+
+<th class="p-3">
+Status
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="logTable">
+
+<tr>
+
+<td class="p-3">
+No logs yet
+</td>
+
+<td class="p-3">
+-
+</td>
+
+<td class="p-3">
+INFO
+</td>
+
+<td class="p-3">
+Idle
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const socket = io()
+
+let totalLogs = 0
+let warningLogs = 0
+let errorLogs = 0
+let criticalLogs = 0
+
+socket.on("live_update", data => {
+
+addLog(data)
+
+})
+
+function addLog(data) {
+
+totalLogs++
+
+let level = "INFO"
+let color = "text-green-400"
+
+if (data.risk_score > 70) {
+
+level = "CRITICAL"
+color = "text-red-600"
+
+criticalLogs++
+
+}
+else if (data.risk_score > 50) {
+
+level = "ERROR"
+color = "text-red-400"
+
+errorLogs++
+
+}
+else if (data.risk_score > 30) {
+
+level = "WARNING"
+color = "text-yellow-400"
+
+warningLogs++
+
+}
+
+updateCounters()
+
+const table =
+document.getElementById(
+"logTable"
+)
+
+const row =
+document.createElement(
+"tr"
+)
+
+row.classList.add(
+"border-b",
+"border-gray-700"
+)
+
+row.innerHTML = `
+
+<td class="p-3">
+
+${data.timestamp}
+
+</td>
+
+<td class="p-3">
+
+${data.alert}
+
+</td>
+
+<td class="p-3 ${color}">
+
+${level}
+
+</td>
+
+<td class="p-3">
+
+Recorded
+
+</td>
+
+`
+
+table.prepend(row)
+
+}
+
+function updateCounters() {
+
+document.getElementById(
+"totalLogs"
+).innerText =
+totalLogs
+
+document.getElementById(
+"warningLogs"
+).innerText =
+warningLogs
+
+document.getElementById(
+"errorLogs"
+).innerText =
+errorLogs
+
+document.getElementById(
+"criticalLogs"
+).innerText =
+criticalLogs
+
+}
+
+function clearLogs() {
+
+document.getElementById(
+"logTable"
+).innerHTML = ""
+
+totalLogs = 0
+warningLogs = 0
+errorLogs = 0
+criticalLogs = 0
+
+updateCounters()
+
+}
+
+function exportLogs() {
+
+alert(
+"Logs exported successfully"
+)
+
+}
+
+</script>
+
+{% endblock %}

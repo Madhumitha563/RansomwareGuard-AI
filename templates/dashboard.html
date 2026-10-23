@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-6 space-y-6">
+
+<h1 class="text-3xl font-bold">
+Security Dashboard
+</h1>
+
+<!-- SYSTEM METRICS -->
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>CPU Usage</p>
+<h2 id="cpuUsage" class="text-4xl text-cyan-400">
+0 %
+</h2>
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>Memory Usage</p>
+<h2 id="memoryUsage" class="text-4xl text-purple-400">
+0 %
+</h2>
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>Disk Usage</p>
+<h2 id="diskUsage" class="text-4xl text-orange-400">
+0 %
+</h2>
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>Risk Score</p>
+<h2 id="riskScore" class="text-4xl text-yellow-400">
+0
+</h2>
+<p id="riskLevel"
+class="mt-2 text-lg font-bold text-green-400">
+LOW
+</p>
+</div>
+
+</div>
+
+<!-- PROCESS + NETWORK -->
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>Active Processes</p>
+<h2 id="processCount"
+class="text-4xl text-blue-400">
+0
+</h2>
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>Network Connections</p>
+<h2 id="networkCount"
+class="text-4xl text-green-400">
+0
+</h2>
+</div>
+
+</div>
+
+<!-- STATUS -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p>System Status</p>
+
+<h2 id="systemStatus"
+class="text-xl text-green-400">
+
+Protected
+
+</h2>
+
+</div>
+
+
+<div class="bg-gray-900 p-6 rounded-xl">
+<p>Update Counter</p>
+<h2 id="updateCounter"
+class="text-4xl text-cyan-400">
+0
+</h2>
+</div>
+
+<!-- THREAT FEED -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+Live Threat Feed
+</h3>
+
+<div id="threatFeed"
+class="space-y-2 max-h-64 overflow-y-auto">
+
+No threats yet
+
+</div>
+
+</div>
+<canvas id="riskChart"></canvas>
+
+<!-- BUTTONS -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<button
+onclick="simulateAttack()"
+class="bg-red-600 p-4 rounded-xl hover:bg-red-700">
+
+Simulate Attack
+
+</button>
+
+<button
+onclick="killSwitch()"
+class="bg-yellow-600 p-4 rounded-xl">
+
+Kill Switch
+
+</button>
+
+<button
+onclick="backupSystem()"
+class="bg-green-600 p-4 rounded-xl hover:bg-green-700">
+
+Backup System
+
+</button>
+
+</div>
+
+</div>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const socket = io()
+
+console.log("Connecting to server...")
+
+/* ================= CHART ================= */
+
+const ctx =
+document.getElementById(
+"riskChart"
+)
+
+const chart =
+new Chart(ctx,
+{
+type: "line",
+
+data:
+{
+labels: [],
+
+datasets:
+[
+{
+label:
+"Risk Score",
+
+data: []
+}
+]
+}
+
+})
+
+/* ================= LIVE UPDATE ================= */
+
+socket.on(
+"connect",
+
+() =>
+{
+console.log(
+"Connected to server"
+)
+}
+)
+
+socket.on(
+"live_update",
+
+data =>
+{
+
+console.log(
+"Received:",
+data
+)
+
+/* UPDATE METRICS */
+
+document.getElementById(
+"cpuUsage"
+).innerText =
+data.cpu + " %"
+
+document.getElementById(
+"memoryUsage"
+).innerText =
+data.memory + " %"
+
+document.getElementById(
+"diskUsage"
+).innerText =
+data.disk + " %"
+
+document.getElementById(
+"processCount"
+).innerText =
+data.processes
+
+document.getElementById(
+"networkCount"
+).innerText =
+data.connections
+
+document.getElementById(
+"riskScore"
+).innerText =
+data.risk_score
+
+document.getElementById(
+"updateCounter"
+).innerText =
+data.counter
+
+updateRiskLevel(
+data.risk_score
+)
+
+updateSystemStatus(
+data.alert
+)
+
+addThreat(
+data.alert
+)
+
+/* UPDATE CHART */
+
+chart.data.labels.push(
+data.timestamp
+)
+
+chart.data.datasets[0]
+.data.push(
+data.risk_score
+)
+
+if (
+chart.data.labels.length > 20
+)
+{
+chart.data.labels.shift()
+
+chart.data.datasets[0]
+.data.shift()
+}
+
+chart.update()
+
+}
+)
+
+/* ================= FUNCTIONS ================= */
+
+function updateRiskLevel(score)
+{
+
+let level = "LOW"
+let color = "green"
+
+if (score > 70)
+{
+level = "CRITICAL"
+color = "red"
+}
+else if (score > 50)
+{
+level = "HIGH"
+color = "orange"
+}
+else if (score > 30)
+{
+level = "MEDIUM"
+color = "yellow"
+}
+
+const el =
+document.getElementById(
+"riskLevel"
+)
+
+el.innerText = level
+
+el.style.color = color
+
+}
+
+function updateSystemStatus(alert)
+{
+
+const status =
+document.getElementById(
+"systemStatus"
+)
+
+if (
+alert.includes("High")
+)
+{
+status.innerText =
+"Threat Detected"
+
+status.style.color =
+"red"
+}
+else
+{
+status.innerText =
+"Protected"
+
+status.style.color =
+"green"
+}
+
+}
+
+function addThreat(text)
+{
+
+const div =
+document.createElement(
+"div"
+)
+
+div.innerText =
+new Date()
+.toLocaleTimeString()
++
+" - "
++
+text
+
+document
+.getElementById(
+"threatFeed"
+)
+.prepend(div)
+
+}
+
+/* ================= BUTTONS ================= */
+
+function simulateAttack()
+{
+
+fetch(
+"/simulate-attack",
+{
+method: "POST"
+}
+)
+.then(res => res.json())
+.then(data =>
+{
+alert(
+data.message
+)
+})
+
+}
+
+function killSwitch()
+{
+
+fetch(
+"/kill-switch",
+{
+method: "POST"
+}
+)
+.then(res => res.json())
+.then(data =>
+{
+alert(
+data.message
+)
+})
+
+}
+
+function backupSystem()
+{
+
+fetch(
+"/backup-system",
+{
+method: "POST"
+}
+)
+.then(res => res.json())
+.then(data =>
+{
+alert(
+data.message
+)
+})
+
+}
+
+</script>
+
+
+{% endblock %}

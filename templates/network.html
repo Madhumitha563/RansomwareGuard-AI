@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="space-y-6">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center">
+
+<div>
+<h1 class="text-3xl font-bold">
+Network Monitor
+</h1>
+
+<p class="text-gray-400">
+Real-time network traffic and connection monitoring
+</p>
+</div>
+
+<p id="connectionStatus"
+class="text-green-400 font-semibold">
+
+● Connected
+
+</p>
+
+</div>
+
+<!-- TOP METRICS -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<!-- Active Connections -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Active Connections
+</p>
+
+<h2
+id="connectionCount"
+class="text-4xl text-green-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<!-- Bandwidth Usage -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Bandwidth Usage (Mbps)
+</p>
+
+<h2
+id="bandwidthUsage"
+class="text-4xl text-blue-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<!-- Network Status -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Network Status
+</p>
+
+<h2
+id="networkStatus"
+class="text-xl text-green-400 mt-2">
+
+Stable
+
+</h2>
+
+</div>
+
+</div>
+
+<!-- NETWORK TRAFFIC CHART -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+
+Network Traffic
+
+</h3>
+
+<canvas id="networkChart"></canvas>
+
+</div>
+
+<!-- TOP CONNECTIONS TABLE -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+
+Top Connections
+
+</h3>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left">
+
+<thead>
+
+<tr class="border-b border-gray-700">
+
+<th class="p-3">
+
+Time
+
+</th>
+
+<th class="p-3">
+
+Source IP
+
+</th>
+
+<th class="p-3">
+
+Destination IP
+
+</th>
+
+<th class="p-3">
+
+Port
+
+</th>
+
+<th class="p-3">
+
+Status
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="connectionTable">
+
+<tr>
+
+<td class="p-3">
+
+No connections yet
+
+</td>
+
+<td class="p-3">
+
+-
+
+</td>
+
+<td class="p-3">
+
+-
+
+</td>
+
+<td class="p-3">
+
+-
+
+</td>
+
+<td class="p-3">
+
+Idle
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const socket = io()
+
+let labels = []
+let trafficData = []
+
+/* CHART */
+
+const networkChart = new Chart(
+document.getElementById("networkChart"),
+{
+type: "line",
+
+data: {
+
+labels: labels,
+
+datasets: [{
+
+label: "Traffic",
+
+data: trafficData
+
+}]
+
+}
+
+}
+)
+
+/* SOCKET CONNECTION */
+
+socket.on("connect", () => {
+
+document.getElementById(
+"connectionStatus"
+).innerText =
+"● Connected"
+
+})
+
+socket.on("disconnect", () => {
+
+document.getElementById(
+"connectionStatus"
+).innerText =
+"● Disconnected"
+
+})
+
+/* LIVE UPDATE */
+
+socket.on("live_update", data => {
+
+updateNetwork(data)
+
+})
+
+function updateNetwork(data) {
+
+document.getElementById(
+"connectionCount"
+).innerText =
+data.connections
+
+document.getElementById(
+"bandwidthUsage"
+).innerText =
+data.bandwidth
+
+labels.push(data.timestamp)
+
+trafficData.push(data.connections)
+
+if (labels.length > 20) {
+
+labels.shift()
+
+trafficData.shift()
+
+}
+
+networkChart.update()
+
+addConnectionRow(data)
+
+checkNetworkStatus(data)
+
+}
+
+function addConnectionRow(data) {
+
+const table =
+document.getElementById(
+"connectionTable"
+)
+
+const row =
+document.createElement("tr")
+
+row.classList.add(
+"border-b",
+"border-gray-700"
+)
+
+row.innerHTML = `
+
+<td class="p-3">
+
+${data.timestamp}
+
+</td>
+
+<td class="p-3">
+
+${data.source_ip || "192.168.1.10"}
+
+</td>
+
+<td class="p-3">
+
+${data.destination_ip || "8.8.8.8"}
+
+</td>
+
+<td class="p-3">
+
+${data.port || "443"}
+
+</td>
+
+<td class="p-3 text-green-400">
+
+Active
+
+</td>
+
+`
+
+table.prepend(row)
+
+}
+
+function checkNetworkStatus(data) {
+
+const status =
+document.getElementById(
+"networkStatus"
+)
+
+if (data.connections > 100) {
+
+status.innerText =
+"High Traffic"
+
+status.style.color =
+"red"
+
+}
+else if (data.connections > 50) {
+
+status.innerText =
+"Moderate"
+
+status.style.color =
+"orange"
+
+}
+else {
+
+status.innerText =
+"Stable"
+
+status.style.color =
+"green"
+
+}
+
+}
+
+</script>
+
+{% endblock %}

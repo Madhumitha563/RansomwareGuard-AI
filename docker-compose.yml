@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+
+  ransomwareguard:
+
+    build: .
+
+    container_name: ransomwareguard-ai
+
+    ports:
+      - "5000:5000"
+
+    volumes:
+      - .:/app
+      - ./honeypot:/app/honeypot
+      - ./data:/app/data
+      - ./quarantine:/app/quarantine
+      - ./backup:/app/backup
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
+
+    stdin_open: true
+    tty: true

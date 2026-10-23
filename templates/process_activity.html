@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="space-y-6">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center">
+
+<div>
+<h1 class="text-3xl font-bold">
+Process Activity Monitor
+</h1>
+
+<p class="text-gray-400">
+Real-time monitoring of running processes and suspicious activity
+</p>
+</div>
+
+<p id="status"
+class="text-green-400 font-semibold">
+
+● Monitoring Active
+
+</p>
+
+</div>
+
+<!-- STATS -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Total Processes
+</p>
+
+<h2
+id="processCount"
+class="text-4xl text-blue-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Suspicious Processes
+</p>
+
+<h2
+id="suspiciousCount"
+class="text-4xl text-red-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+System Status
+</p>
+
+<h2
+id="systemStatus"
+class="text-xl text-green-400 mt-2">
+
+Safe
+
+</h2>
+
+</div>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+Running Processes
+</h3>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left">
+
+<thead>
+
+<tr class="border-b border-gray-700">
+
+<th class="p-3">Time</th>
+<th class="p-3">Process Name</th>
+<th class="p-3">PID</th>
+<th class="p-3">CPU %</th>
+<th class="p-3">Status</th>
+
+</tr>
+
+</thead>
+
+<tbody id="processTable">
+
+<tr>
+<td class="p-3">No processes yet</td>
+<td class="p-3">-</td>
+<td class="p-3">-</td>
+<td class="p-3">-</td>
+<td class="p-3">Idle</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const socket = io()
+
+socket.on("process_update", data => {
+
+updateProcess(data)
+
+})
+
+function updateProcess(data) {
+
+document.getElementById(
+"processCount"
+).innerText =
+data.total
+
+document.getElementById(
+"suspiciousCount"
+).innerText =
+data.suspicious
+
+if (data.suspicious > 0) {
+
+document.getElementById(
+"systemStatus"
+).innerText =
+"Threat Detected"
+
+document.getElementById(
+"systemStatus"
+).style.color =
+"red"
+
+}
+else {
+
+document.getElementById(
+"systemStatus"
+).innerText =
+"Safe"
+
+document.getElementById(
+"systemStatus"
+).style.color =
+"green"
+
+}
+
+const table =
+document.getElementById(
+"processTable"
+)
+
+table.innerHTML = ""
+
+data.processes.forEach(proc => {
+
+const row =
+document.createElement("tr")
+
+row.classList.add(
+"border-b",
+"border-gray-700"
+)
+
+row.innerHTML = `
+
+<td class="p-3">
+${proc.time}
+</td>
+
+<td class="p-3">
+${proc.name}
+</td>
+
+<td class="p-3">
+${proc.pid}
+</td>
+
+<td class="p-3">
+${proc.cpu}
+</td>
+
+<td class="p-3">
+${proc.status}
+</td>
+
+`
+
+table.appendChild(row)
+
+})
+
+}
+
+</script>
+
+{% endblock %}

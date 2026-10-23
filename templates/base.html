@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>RansomwareGuard AI</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body class="bg-zinc-950 text-white">
+
+<div class="flex h-screen">
+
+<!-- SIDEBAR -->
+
+<div class="w-64 bg-black border-r border-gray-800 flex flex-col">
+
+<!-- LOGO -->
+
+<div class="p-6 border-b border-gray-800">
+
+<h2 class="text-xl font-bold text-cyan-400">
+RansomwareGuard AI
+</h2>
+
+<p class="text-gray-400 text-sm">
+Cybersecurity Platform
+</p>
+
+</div>
+
+<!-- NAVIGATION -->
+
+<nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+
+<a href="/dashboard"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Dashboard
+
+</a>
+
+<a href="/threats"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Threat Monitor
+
+</a>
+
+<a href="/system"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+System Monitor
+
+</a>
+
+<a href="/network"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Network Monitor
+
+</a>
+
+<a href="/process"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Process Activity
+
+</a>
+
+<a href="/files"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+File Monitoring
+
+</a>
+
+<a href="/logs"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Security Logs
+
+</a>
+
+<a href="/alerts"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Alerts Center
+
+</a>
+
+<a href="/backup"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Backup & Recovery
+
+</a>
+
+<a href="/quarantine"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Quarantine Manager
+
+</a>
+
+<a href="/reports"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Reports & Analytics
+
+</a>
+
+<a href="/settings"
+class="block p-3 rounded-lg hover:bg-gray-800">
+
+Settings
+
+</a>
+
+</nav>
+
+<!-- FOOTER -->
+
+<div class="p-4 border-t border-gray-800 text-sm text-gray-400">
+
+System Status:  
+<span class="text-green-400">
+Protected
+</span>
+
+</div>
+
+</div>
+
+<!-- MAIN AREA -->
+
+<div class="flex-1 flex flex-col">
+
+<!-- TOP NAVBAR -->
+
+<div class="flex justify-between items-center bg-black border-b border-gray-800 p-4">
+
+<h1 class="text-lg font-semibold">
+
+Security Control Panel
+
+</h1>
+
+<div class="flex items-center gap-6">
+
+<!-- NOTIFICATION -->
+
+<div class="relative">
+
+
+
+<span
+class="absolute -top-1 -right-2 bg-red-500 text-xs px-2 rounded-full">
+
+
+
+</span>
+
+</div>
+
+<!-- USER -->
+
+<div class="flex items-center gap-2">
+
+
+</div>
+
+</div>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="flex-1 overflow-y-auto p-6">
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

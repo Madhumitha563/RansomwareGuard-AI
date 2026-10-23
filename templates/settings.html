@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="space-y-6">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center">
+
+<div>
+
+<h1 class="text-3xl font-bold">
+System Settings
+</h1>
+
+<p class="text-gray-400">
+Configure system preferences and security options
+</p>
+
+</div>
+
+<button
+onclick="saveSettings()"
+class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
+
+Save Settings
+
+</button>
+
+</div>
+
+<!-- SETTINGS GRID -->
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+<!-- DETECTION MODE -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-lg font-semibold mb-4">
+Detection Mode
+</h3>
+
+<select
+id="mode"
+class="bg-black p-3 rounded-lg w-full border border-gray-700">
+
+<option value="auto">
+Automatic
+</option>
+
+<option value="manual">
+Manual
+</option>
+
+</select>
+
+</div>
+
+<!-- ALERT NOTIFICATIONS -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-lg font-semibold mb-4">
+Alert Notifications
+</h3>
+
+<label class="flex items-center gap-3">
+
+<input
+type="checkbox"
+id="alertsToggle"
+checked>
+
+Enable Alerts
+
+</label>
+
+</div>
+
+<!-- EMAIL ALERT -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-lg font-semibold mb-4">
+Email Notification
+</h3>
+
+<input
+id="email"
+type="email"
+placeholder="admin@example.com"
+class="bg-black p-3 rounded-lg w-full border border-gray-700">
+
+</div>
+
+<!-- BACKUP SCHEDULE -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-lg font-semibold mb-4">
+Backup Schedule
+</h3>
+
+<select
+id="backupSchedule"
+class="bg-black p-3 rounded-lg w-full border border-gray-700">
+
+<option>
+Every Hour
+</option>
+
+<option>
+Every 6 Hours
+</option>
+
+<option>
+Daily
+</option>
+
+<option>
+Weekly
+</option>
+
+</select>
+
+</div>
+
+<!-- SYSTEM THEME -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-lg font-semibold mb-4">
+Theme Selection
+</h3>
+
+<select
+id="theme"
+class="bg-black p-3 rounded-lg w-full border border-gray-700">
+
+<option>
+Dark
+</option>
+
+<option>
+Light
+</option>
+
+</select>
+
+</div>
+
+<!-- AUTO BACKUP -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-lg font-semibold mb-4">
+Auto Backup
+</h3>
+
+<label class="flex items-center gap-3">
+
+<input
+type="checkbox"
+id="backupToggle"
+checked>
+
+Enable Automatic Backup
+
+</label>
+
+</div>
+
+</div>
+
+<!-- SYSTEM ACTIONS -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+System Actions
+</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<button
+onclick="restartSystem()"
+class="bg-yellow-600 p-4 rounded-lg hover:bg-yellow-700">
+
+Restart System
+
+</button>
+
+<button
+onclick="shutdownSystem()"
+class="bg-red-600 p-4 rounded-lg hover:bg-red-700">
+
+Shutdown System
+
+</button>
+
+<button
+onclick="resetSettings()"
+class="bg-blue-600 p-4 rounded-lg hover:bg-blue-700">
+
+Reset Settings
+
+</button>
+
+</div>
+
+</div>
+
+<!-- STATUS MESSAGE -->
+
+<div
+id="statusMessage"
+class="text-green-400 font-semibold">
+
+</div>
+
+</div>
+
+<script>
+
+/* SAVE SETTINGS */
+
+function saveSettings() {
+
+const mode =
+document.getElementById("mode").value
+
+const alerts =
+document.getElementById("alertsToggle").checked
+
+const email =
+document.getElementById("email").value
+
+const backup =
+document.getElementById("backupSchedule").value
+
+const theme =
+document.getElementById("theme").value
+
+const autoBackup =
+document.getElementById("backupToggle").checked
+
+fetch("/save_settings", {
+
+method: "POST",
+
+headers: {
+
+"Content-Type":
+"application/json"
+
+},
+
+body: JSON.stringify({
+
+mode,
+alerts,
+email,
+backup,
+theme,
+autoBackup
+
+})
+
+})
+
+.then(() => {
+
+document.getElementById(
+"statusMessage"
+).innerText =
+"Settings saved successfully"
+
+})
+
+}
+
+/* SYSTEM ACTIONS */
+
+function restartSystem() {
+
+alert(
+"System restarting..."
+)
+
+}
+
+function shutdownSystem() {
+
+alert(
+"System shutting down..."
+)
+
+}
+
+function resetSettings() {
+
+location.reload()
+
+}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="space-y-6">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center">
+
+<div>
+
+<h1 class="text-3xl font-bold">
+System Monitor
+</h1>
+
+<p class="text-gray-400">
+Real-time system performance and health monitoring
+</p>
+
+</div>
+
+<p id="systemStatus"
+class="text-green-400 font-semibold">
+
+● Healthy
+
+</p>
+
+</div>
+
+<!-- SYSTEM METRICS -->
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+<!-- CPU -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+CPU Usage
+</p>
+
+<h2
+id="cpuUsage"
+class="text-4xl text-yellow-400 mt-2">
+
+0%
+
+</h2>
+
+</div>
+
+<!-- MEMORY -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Memory Usage
+</p>
+
+<h2
+id="memoryUsage"
+class="text-4xl text-blue-400 mt-2">
+
+0%
+
+</h2>
+
+</div>
+
+<!-- DISK -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Disk Usage
+</p>
+
+<h2
+id="diskUsage"
+class="text-4xl text-red-400 mt-2">
+
+0%
+
+</h2>
+
+</div>
+
+<!-- PROCESSES -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Running Processes
+</p>
+
+<h2
+id="processCount"
+class="text-4xl text-green-400 mt-2">
+
+0
+
+</h2>
+
+</div>
+
+</div>
+
+<!-- PERFORMANCE CHART -->
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<h3 class="text-xl mb-4">
+System Performance
+</h3>
+
+<canvas id="performanceChart"></canvas>
+
+</div>
+
+<!-- SYSTEM INFO -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+System Uptime
+</p>
+
+<h2
+id="uptime"
+class="text-xl text-cyan-400 mt-2">
+
+0 sec
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+Operating System
+</p>
+
+<h2
+class="text-lg text-white mt-2">
+
+Windows / Linux
+
+</h2>
+
+</div>
+
+<div class="bg-gray-900 p-6 rounded-xl">
+
+<p class="text-gray-400">
+System Mode
+</p>
+
+<h2
+id="mode"
+class="text-lg text-green-400 mt-2">
+
+Normal
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const socket = io()
+
+let seconds = 0
+
+const labels = []
+const cpuData = []
+
+/* UPTIME */
+
+setInterval(() => {
+
+seconds++
+
+document.getElementById(
+"uptime"
+).innerText =
+seconds + " sec"
+
+}, 1000)
+
+/* CHART */
+
+const performanceChart = new Chart(
+document.getElementById(
+"performanceChart"
+),
+{
+type: "line",
+
+data: {
+
+labels: labels,
+
+datasets: [
+
+{
+label: "CPU Usage",
+
+data: cpuData
+
+}
+
+]
+
+}
+
+}
+)
+
+/* SOCKET LIVE UPDATE */
+
+socket.on(
+"live_update",
+data => {
+
+updateSystem(data)
+
+}
+)
+
+function updateSystem(data) {
+
+const cpu =
+data.cpu || randomValue()
+
+const memory =
+data.memory || randomValue()
+
+const disk =
+data.disk || randomValue()
+
+const processes =
+data.processes || randomProcess()
+
+document.getElementById(
+"cpuUsage"
+).innerText =
+cpu + "%"
+
+document.getElementById(
+"memoryUsage"
+).innerText =
+memory + "%"
+
+document.getElementById(
+"diskUsage"
+).innerText =
+disk + "%"
+
+document.getElementById(
+"processCount"
+).innerText =
+processes
+
+labels.push(data.timestamp)
+
+cpuData.push(cpu)
+
+if (labels.length > 20) {
+
+labels.shift()
+cpuData.shift()
+
+}
+
+performanceChart.update()
+
+checkHealth(cpu)
+
+}
+
+/* HEALTH STATUS */
+
+function checkHealth(cpu) {
+
+const status =
+document.getElementById(
+"systemStatus"
+)
+
+if (cpu > 80) {
+
+status.innerText =
+"● Critical"
+
+status.style.color =
+"red"
+
+}
+else if (cpu > 60) {
+
+status.innerText =
+"● Warning"
+
+status.style.color =
+"orange"
+
+}
+else {
+
+status.innerText =
+"● Healthy"
+
+status.style.color =
+"green"
+
+}
+
+}
+
+/* RANDOM VALUES (fallback demo) */
+
+function randomValue() {
+
+return Math.floor(
+Math.random() * 100
+)
+
+}
+
+function randomProcess() {
+
+return Math.floor(
+Math.random() * 150
+)
+
+}
+
+</script>
+
+{% endblock %}
