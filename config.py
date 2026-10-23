@@ -1,95 +1,69 @@
+
 import os
+import tempfile
 from datetime import timedelta
 
 # ================= BASE PATH =================
 
-BASE_DIR = os.path.abspath(
-    os.path.dirname(__file__)
-)
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# Vercel deployment filesystem is read-only.
+# Use /tmp on Vercel; local development uses project folders.
+IS_VERCEL = os.getenv("VERCEL") == "1"
+
+if IS_VERCEL:
+    STORAGE_ROOT = os.path.join(tempfile.gettempdir(), "ransomwareguard")
+else:
+    STORAGE_ROOT = BASE_DIR
+
+# ================= PATHS =================
+
+DATA_FOLDER = os.path.join(STORAGE_ROOT, "data")
+HONEYPOT_FOLDER = os.path.join(STORAGE_ROOT, "honeypot")
+QUARANTINE_FOLDER = os.path.join(STORAGE_ROOT, "quarantine")
+BACKUP_FOLDER = os.path.join(STORAGE_ROOT, "backup")
+
+# Create folders in writable storage
+for folder in (
+    DATA_FOLDER,
+    HONEYPOT_FOLDER,
+    QUARANTINE_FOLDER,
+    BACKUP_FOLDER,
+):
+    os.makedirs(folder, exist_ok=True)
 
 # ================= MAIN CONFIG =================
 
 class Config:
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
-    SECRET_KEY = os.getenv(
-        "SECRET_KEY",
-        "ransomwareguard-secret-2026"
-    )
+    if not SECRET_KEY:
+        SECRET_KEY = "local-development-only-change-me"
 
     SQLALCHEMY_DATABASE_URI = (
-
         "sqlite:///"
-
-        + os.path.join(
-            BASE_DIR,
-            "data",
-            "ransomwareguard.db"
-        )
-
+        + os.path.join(DATA_FOLDER, "ransomwareguard.db")
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    PERMANENT_SESSION_LIFETIME = timedelta(
-        minutes=15
-    )
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=15)
 
     # EMAIL
-
     MAIL_SERVER = "smtp.gmail.com"
-
     MAIL_PORT = 587
-
     MAIL_USE_TLS = True
-
-    MAIL_USERNAME = os.getenv(
-        "MAIL_USERNAME"
-    )
-
-    MAIL_PASSWORD = os.getenv(
-        "MAIL_PASSWORD"
-    )
-
-    MAIL_DEFAULT_SENDER = os.getenv(
-        "MAIL_USERNAME"
-    )
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_USERNAME")
 
 
-# ================= GLOBAL EMAIL VARIABLE (FIX) =================
+# ================= ALERT EMAIL =================
 
 ALERT_EMAIL = os.getenv(
     "ALERT_EMAIL",
     os.getenv("MAIL_USERNAME")
 )
-
-# ================= PATHS =================
-
-DATA_FOLDER = os.path.join(
-    BASE_DIR,
-    "data"
-)
-
-HONEYPOT_FOLDER = os.path.join(
-    BASE_DIR,
-    "honeypot"
-)
-
-QUARANTINE_FOLDER = os.path.join(
-    BASE_DIR,
-    "quarantine"
-)
-
-BACKUP_FOLDER = os.path.join(
-    BASE_DIR,
-    "backup"
-)
-
-# ================= CREATE FOLDERS =================
-
-os.makedirs(DATA_FOLDER, exist_ok=True)
-os.makedirs(HONEYPOT_FOLDER, exist_ok=True)
-os.makedirs(QUARANTINE_FOLDER, exist_ok=True)
-os.makedirs(BACKUP_FOLDER, exist_ok=True)
 
 # ================= RISK THRESHOLDS =================
 
